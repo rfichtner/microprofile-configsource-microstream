@@ -22,26 +22,45 @@ package one.fichtner.microprofile.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import io.smallrye.config.SmallRyeConfig;
 import io.smallrye.config.SmallRyeConfigBuilder;
 
-class ConfigConfigSourceTest {
+@TestMethodOrder(OrderAnnotation.class)
+class MicroStreamConfigSourceTest {
 
+	@Order(1)
 	@Test
 	void configure() {
 
-		final Map<String, String> given = new HashMap<>();
-		given.put("my.prop", "1234");
+		final MicroStreamConfigSource MSconfigSource = new MicroStreamConfigSource();
+		MSconfigSource.setProperty("my.prop", "1234");
 
 		final SmallRyeConfig config = new SmallRyeConfigBuilder().addDefaultSources().addDefaultInterceptors()
-				.withSources(new InMemoryConfigSource(given)).build();
+				.withSources(MSconfigSource).build();
 
 		assertEquals("1234", config.getRawValue("my.prop"));
+
+		MSconfigSource.close();
+
+	}
+
+	@Order(2)
+	@Test
+	void readFromStore() {
+
+		final MicroStreamConfigSource MSconfigSource = new MicroStreamConfigSource();
+
+		final SmallRyeConfig config = new SmallRyeConfigBuilder().addDefaultSources().addDefaultInterceptors()
+				.withSources(MSconfigSource).build();
+
+		assertEquals("1234", config.getRawValue("my.prop"));
+
+		MSconfigSource.close();
 
 	}
 
